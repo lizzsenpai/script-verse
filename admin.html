@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ScriptVerse - Admin Panel</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        /* ----- RESET & GLOBAL ----- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b0f1a;
+            color: #e8edf5;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            background-image: radial-gradient(circle at 20% 30%, #19233b 0%, #0b0f1a 90%);
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background: rgba(18, 26, 45, 0.7);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-radius: 48px;
+            padding: 2.5rem 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        /* ----- HEADER ----- */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            padding-bottom: 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            font-size: 2.2rem;
+            background: linear-gradient(135deg, #a78bfa, #60a5fa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border-radius: 40px;
+            border: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 28px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 28px rgba(239, 68, 68, 0.5);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #22c55e, #16a34a);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(34, 197, 94, 0.3);
+        }
+
+        .btn-success:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 28px rgba(34, 197, 94, 0.5);
+        }
+
+        .btn-secondary {
+            background: #1e293b;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        .btn-secondary:hover {
+            background: #334155;
+            color: #e8edf5;
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: #94a3b8;
+            border: 1px solid #334155;
+        }
+
+        .btn-outline:hover {
+            background: #1e293b;
+            color: #e8edf5;
+        }
+
+        /* ----- LOGIN FORM ----- */
+        .login-wrapper {
+            max-width: 420px;
+            margin: 3rem auto;
+            text-align: center;
+        }
+
+        .login-wrapper .lock-icon {
+            font-size: 4rem;
+            color: #818cf8;
+            margin-bottom: 1rem;
+        }
+
+        .login-wrapper h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .login-wrapper p {
+            color: #94a3b8;
+            margin-bottom: 2rem;
+        }
+
+        .login-wrapper input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: 40px;
+            border: none;
+            background: #1e293b;
+            color: #f1f5f9;
+            font-size: 1rem;
+            outline: 2px solid transparent;
+            transition: 0.25s ease;
+            box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4);
+            margin-bottom: 16px;
+        }
+
+        .login-wrapper input:focus {
+            outline: 2px solid #818cf8;
+            background: #0f172a;
+        }
+
+        .login-wrapper .btn {
+            width: 100%;
+            justify-content: center;
+            padding: 16px;
+            font-size: 1rem;
+        }
+
+        .login-error {
+            color: #f87171;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            display: none;
+        }
+
+        /* ----- FORM TAMBAH SCRIPT ----- */
+        .form-section {
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 28px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .form-section.show {
+            display: block;
+            animation: fadeUp 0.4s ease forwards;
+        }
+
+        .form-section h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section h3 i {
+            color: #818cf8;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .form-group label i {
+            margin-right: 6px;
+            color: #818cf8;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 16px;
+            border-radius: 16px;
+            border: 1px solid #1e293b;
+            background: #0f172a;
+            color: #f1f5f9;
+            font-size: 0.95rem;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: 2px solid #818cf8;
+            border-color: transparent;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-group select option {
+            background: #0f172a;
+        }
+
+        .form-actions {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        /* ----- TABEL SCRIPT ----- */
+        .table-wrapper {
+            overflow-x: auto;
+            margin-top: 1.5rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        thead {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        th {
+            padding: 14px 16px;
+            text-align: left;
+            color: #94a3b8;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .table-thumb {
+            width: 60px;
+            height: 34px;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .table-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .table-actions .btn {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+        }
+
+        .badge-status-small {
+            padding: 3px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        /* ----- TOAST ----- */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 16px 24px;
+            color: #e8edf5;
+            font-size: 0.9rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            transform: translateY(120px);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 400px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast i {
+            font-size: 1.4rem;
+        }
+
+        .toast.success i {
+            color: #4ade80;
+        }
+        .toast.error i {
+            color: #f87171;
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1.5rem 1rem;
+                border-radius: 32px;
+            }
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .form-actions {
+                flex-direction: column;
+            }
+            .form-actions .btn {
+                justify-content: center;
+            }
+            .table-actions {
+                flex-direction: column;
+            }
+            .logo {
+                font-size: 1.5rem;
+            }
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* hidden class */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <!-- HEADER -->
+        <div class="header">
+            <div class="logo">
+                <i class="fas fa-terminal"></i> ScriptVerse
+                <span style="font-size: 0.7rem; background: #818cf8; color: #fff; padding: 2px 12px; border-radius: 20px; -webkit-text-fill-color: #fff;">Admin</span>
+            </div>
+            <div class="header-actions">
+                <button class="btn btn-secondary" id="viewPublicBtn">
+                    <i class="fas fa-eye"></i> Lihat Publik
+                </button>
+                <button class="btn btn-danger" id="logoutBtn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- LOGIN -->
+        <div id="loginSection" class="login-wrapper">
+            <div class="lock-icon"><i class="fas fa-lock"></i></div>
+            <h2>Admin Panel</h2>
+            <p>Masukkan key untuk mengelola script</p>
+            <input type="password" id="adminKeyInput" placeholder="Masukkan key admin..." />
+            <button class="btn btn-primary" id="loginBtn"><i class="fas fa-key"></i> Login</button>
+            <div class="login-error" id="loginError">❌ Key salah! Coba lagi.</div>
+        </div>
+
+        <!-- KONTEN ADMIN (hanya tampil setelah login) -->
+        <div id="adminContent" class="hidden">
+            <!-- Form Tambah/Edit Script -->
+            <div class="form-section" id="formSection">
+                <h3><i class="fas fa-plus-circle"></i> <span id="formTitle">Tambah Script Baru</span></h3>
+                <form id="scriptForm" class="form-grid">
+                    <input type="hidden" id="editId" value="" />
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-tag"></i> Judul Script *</label>
+                        <input type="text" id="fTitle" placeholder="Contoh: Bot WhatsApp Pro" required />
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-code-branch"></i> Versi *</label>
+                        <input type="text" id="fVersion" placeholder="Contoh: v3.2.1" required />
+                    </div>
+                    <div class="form-group full">
+                        <label><i class="fas fa-align-left"></i> Deskripsi *</label>
+                        <textarea id="fDesc" placeholder="Jelaskan fungsi script..." required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-folder"></i> Kategori *</label>
+                        <select id="fCategory" required>
+                            <option value="whatsapp">WhatsApp</option>
+                            <option value="python">Python</option>
+                            <option value="bash">Bash</option>
+                            <option value="js">JavaScript</option>
+                            <option value="other">Lainnya</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-circle"></i> Status *</label>
+                        <select id="fStatus" required>
+                            <option value="Active">Active</option>
+                            <option value="Beta">Beta</option>
+                            <option value="Deprecated">Deprecated</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-download"></i> Jumlah Download</label>
+                        <input type="number" id="fDownloads" placeholder="0" value="0" />
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-file-archive"></i> Ukuran File</label>
+                        <input type="text" id="fSize" placeholder="Contoh: 4.2 MB" value="1 MB" />
+                    </div>
+                    <div class="form-group full">
+                        <label><i class="fas fa-image"></i> URL Gambar (thumbnail 16:9) *</label>
+                        <input type="url" id="fImage" placeholder="https://example.com/gambar.jpg" required />
+                    </div>
+                    <div class="form-group full">
+                        <label><i class="fas fa-link"></i> URL Download *</label>
+                        <input type="url" id="fDownloadUrl" placeholder="https://github.com/.../archive/main.zip" required />
+                    </div>
+                    <div class="form-group full">
+                        <label><i class="fas fa-share-alt"></i> URL Share</label>
+                        <input type="url" id="fShareUrl" placeholder="https://example.com/script/nama" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> <span id="submitBtnText">Simpan Script</span></button>
+                        <button type="button" class="btn btn-secondary" id="cancelFormBtn"><i class="fas fa-times"></i> Batal</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tombol Tambah -->
+            <button class="btn btn-primary" id="showFormBtn">
+                <i class="fas fa-plus"></i> Tambah Script Baru
+            </button>
+
+            <!-- Tabel Script -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Gambar</th>
+                            <th>Judul</th>
+                            <th>Versi</th>
+                            <th>Kategori</th>
+                            <th>Status</th>
+                            <th>Download</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- di-render JS -->
+                    </tbody>
+                </table>
+            </div>
+            <p style="color: #64748b; margin-top: 1rem; font-size: 0.85rem;">
+                <i class="fas fa-info-circle"></i> Data tersimpan otomatis di penyimpanan browser (LocalStorage).
+            </p>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Berhasil!</span>
+    </div>
+
+    <script>
+        // ----- KONFIGURASI -----
+        const ADMIN_KEY = '7655827848';
+        const STORAGE_KEY = 'scriptverse_data';
+
+        // ----- DATA DEFAULT (jika kosong) -----
+        const defaultScripts = [{
+            id: 1,
+            title: 'Bot WhatsApp Pro',
+            version: 'v3.2.1',
+            desc: 'Bot WhatsApp multi-fitur dengan auto reply, downloader, dan manajemen grup.',
+            category: 'whatsapp',
+            status: 'Active',
+            downloads: 1523,
+            size: '4.2 MB',
+            image: 'https://picsum.photos/seed/bot1/800/450',
+            downloadUrl: 'https://github.com/example/bot-wa-pro/archive/main.zip',
+            shareUrl: 'https://example.com/script/bot-wa-pro'
+        }, {
+            id: 2,
+            title: 'Bot WhatsApp MD',
+            version: 'v2.0.5',
+            desc: 'Bot WhatsApp menggunakan library whatsapp-web.js. Fitur: sticker maker, pengingat.',
+            category: 'whatsapp',
+            status: 'Beta',
+            downloads: 876,
+            size: '3.8 MB',
+            image: 'https://picsum.photos/seed/bot2/800/450',
+            downloadUrl: 'https://github.com/example/bot-wa-md/archive/main.zip',
+            shareUrl: 'https://example.com/script/bot-wa-md'
+        }, {
+            id: 3,
+            title: 'Auto Backup Cloud',
+            version: 'v1.5.0',
+            desc: 'Backup otomatis folder ke Google Drive & Dropbox dengan Python.',
+            category: 'python',
+            status: 'Active',
+            downloads: 642,
+            size: '12 KB',
+            image: 'https://picsum.photos/seed/backup/800/450',
+            downloadUrl: 'https://github.com/example/auto-backup/archive/main.zip',
+            shareUrl: 'https://example.com/script/auto-backup'
+        }, {
+            id: 4,
+            title: 'Clean Temp System',
+            version: 'v2.1.0',
+            desc: 'Bersihkan file temporary, cache, dan log di Windows/Linux.',
+            category: 'bash',
+            status: 'Active',
+            downloads: 417,
+            size: '4 KB',
+            image: 'https://picsum.photos/seed/cleaner/800/450',
+            downloadUrl: 'https://github.com/example/clean-temp/archive/main.zip',
+            shareUrl: 'https://example.com/script/clean-temp'
+        }];
+
+        // ----- STATE -----
+        let scripts = [];
+        let isLoggedIn = false;
+        let editingId = null;
+
+        // ----- ELEMEN -----
+        const loginSection = document.getElementById('loginSection');
+        const adminContent = document.getElementById('adminContent');
+        const loginBtn = document.getElementById('loginBtn');
+        const adminKeyInput = document.getElementById('adminKeyInput');
+        const loginError = document.getElementById('loginError');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const viewPublicBtn = document.getElementById('viewPublicBtn');
+
+        const formSection = document.getElementById('formSection');
+        const showFormBtn = document.getElementById('showFormBtn');
+        const cancelFormBtn = document.getElementById('cancelFormBtn');
+        const scriptForm = document.getElementById('scriptForm');
+        const formTitle = document.getElementById('formTitle');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const editId = document.getElementById('editId');
+
+        const fTitle = document.getElementById('fTitle');
+        const fVersion = document.getElementById('fVersion');
+        const fDesc = document.getElementById('fDesc');
+        const fCategory = document.getElementById('fCategory');
+        const fStatus = document.getElementById('fStatus');
+        const fDownloads = document.getElementById('fDownloads');
+        const fSize = document.getElementById('fSize');
+        const fImage = document.getElementById('fImage');
+        const fDownloadUrl = document.getElementById('fDownloadUrl');
+        const fShareUrl = document.getElementById('fShareUrl');
+
+        const tableBody = document.getElementById('tableBody');
+
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+
+        // ----- FUNGSI TOAST -----
+        function showToast(message, type = 'success') {
+            toastMessage.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            clearTimeout(toast._timer);
+            toast._timer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ----- CRUD OPERATIONS -----
+        function loadData() {
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                try {
+                    scripts = JSON.parse(stored);
+                } catch (e) {
+                    scripts = [...defaultScripts];
+                }
+            } else {
+                scripts = [...defaultScripts];
+                saveData();
+            }
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+        }
+
+        function getNextId() {
+            return scripts.length > 0 ? Math.max(...scripts.map(s => s.id)) + 1 : 1;
+        }
+
+        function addScript(data) {
+            const newScript = {
+                id: getNextId(),
+                ...data,
+                downloads: parseInt(data.downloads) || 0
+            };
+            scripts.push(newScript);
+            saveData();
+            renderTable();
+            showToast('✅ Script berhasil ditambahkan!');
+        }
+
+        function updateScript(id, data) {
+            const index = scripts.findIndex(s => s.id === id);
+            if (index !== -1) {
+                scripts[index] = {
+                    ...scripts[index],
+                    ...data,
+                    downloads: parseInt(data.downloads) || 0
+                };
+                saveData();
+                renderTable();
+                showToast('✅ Script berhasil diupdate!');
+            }
+        }
+
+        function deleteScript(id) {
+            if (confirm('Yakin hapus script ini?')) {
+                scripts = scripts.filter(s => s.id !== id);
+                saveData();
+                renderTable();
+                showToast('🗑️ Script dihapus!');
+            }
+        }
+
+        // ----- RENDER TABEL -----
+        function renderTable() {
+            if (scripts.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align:center; color:#64748b; padding:2rem;">
+                            <i class="fas fa-inbox" style="font-size:2rem; display:block; margin-bottom:8px;"></i>
+                            Belum ada script. Tambahkan yang pertama!
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = scripts.map(s => `
+                <tr>
+                    <td><img src="${s.image}" alt="${s.title}" class="table-thumb" /></td>
+                    <td><strong>${s.title}</strong></td>
+                    <td>${s.version}</td>
+                    <td><span class="badge-status-small" style="background:rgba(129,140,248,0.2); color:#818cf8;">${s.category}</span></td>
+                    <td><span class="badge-status-small badge-status-small-${s.status.toLowerCase()}">${s.status}</span></td>
+                    <td>${s.downloads.toLocaleString()}</td>
+                    <td>
+                        <div class="table-actions">
+                            <button class="btn btn-primary" onclick="editScript(${s.id})" style="padding:4px 12px; font-size:0.75rem;">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteScript(${s.id})" style="padding:4px 12px; font-size:0.75rem;">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ----- EDIT SCRIPT -----
+        function editScript(id) {
+            const script = scripts.find(s => s.id === id);
+            if (!script) return;
+
+            editingId = id;
+            editId.value = id;
+            fTitle.value = script.title;
+            fVersion.value = script.version;
+            fDesc.value = script.desc;
+            fCategory.value = script.category;
+            fStatus.value = script.status;
+            fDownloads.value = script.downloads;
+            fSize.value = script.size;
+            fImage.value = script.image;
+            fDownloadUrl.value = script.downloadUrl;
+            fShareUrl.value = script.shareUrl || '';
+
+            formTitle.textContent = 'Edit Script';
+            submitBtnText.textContent = 'Update Script';
+            formSection.classList.add('show');
+            formSection.scrollIntoView({ behavior: 'smooth' });
+            showFormBtn.style.display = 'none';
+        }
+
+        // ----- RESET FORM -----
+        function resetForm() {
+            scriptForm.reset();
+            editId.value = '';
+            editingId = null;
+            formTitle.textContent = 'Tambah Script Baru';
+            submitBtnText.textContent = 'Simpan Script';
+            formSection.classList.remove('show');
+            showFormBtn.style.display = 'inline-flex';
+            fDownloads.value = '0';
+            fSize.value = '1 MB';
+        }
+
+        // ----- HANDLE FORM SUBMIT -----
+        scriptForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const data = {
+                title: fTitle.value.trim(),
+                version: fVersion.value.trim(),
+                desc: fDesc.value.trim(),
+                category: fCategory.value,
+                status: fStatus.value,
+                downloads: parseInt(fDownloads.value) || 0,
+                size: fSize.value.trim() || '1 MB',
+                image: fImage.value.trim(),
+                downloadUrl: fDownloadUrl.value.trim(),
+                shareUrl: fShareUrl.value.trim() || fDownloadUrl.value.trim()
+            };
+
+            // Validasi
+            if (!data.title || !data.version || !data.desc || !data.image || !data.downloadUrl) {
+                showToast('⚠️ Semua field wajib diisi!', 'error');
+                return;
+            }
+
+            if (editingId) {
+                updateScript(editingId, data);
+            } else {
+                addScript(data);
+            }
+
+            resetForm();
+        });
+
+        // ----- EVENT LISTENERS -----
+        showFormBtn.addEventListener('click', function() {
+            resetForm();
+            formSection.classList.add('show');
+            this.style.display = 'none';
+        });
+
+        cancelFormBtn.addEventListener('click', resetForm);
+
+        // ----- LOGIN -----
+        loginBtn.addEventListener('click', function() {
+            const key = adminKeyInput.value.trim();
+            if (key === ADMIN_KEY) {
+                isLoggedIn = true;
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                loginError.style.display = 'none';
+                loadData();
+                renderTable();
+                showToast('✅ Selamat datang, Admin!');
+                adminKeyInput.value = '';
+            } else {
+                loginError.style.display = 'block';
+                adminKeyInput.value = '';
+                adminKeyInput.focus();
+                showToast('❌ Key salah!', 'error');
+            }
+        });
+
+        adminKeyInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') loginBtn.click();
+        });
+
+        // ----- LOGOUT -----
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Yakin logout?')) {
+                isLoggedIn = false;
+                loginSection.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+                showToast('👋 Logout berhasil!');
+            }
+        });
+
+        // ----- VIEW PUBLIC (buka halaman publik di tab baru) -----
+        viewPublicBtn.addEventListener('click', function() {
+            // Buka halaman publik (kita simpan di file terpisah atau tab baru)
+            // Karena kita pakai satu file, kita akan reload dengan parameter
+            window.open('?mode=public', '_blank');
+        });
+
+        // ----- CEK LOGIN STATE -----
+        function checkLogin() {
+            // Cek apakah sudah login (bisa pakai session storage)
+            // Untuk demo, kita simpel: cek dari localStorage flag
+            const savedLogin = localStorage.getItem('scriptverse_admin_login');
+            if (savedLogin === 'true') {
+                isLoggedIn = true;
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                loadData();
+                renderTable();
+            }
+        }
+
+        // Simpan login state
+        function saveLoginState(state) {
+            localStorage.setItem('scriptverse_admin_login', state ? 'true' : 'false');
+        }
+
+        // Override login/logout untuk simpan state
+        const originalLogin = loginBtn.click;
+        loginBtn.addEventListener('click', function() {
+            // sudah di atas
+        });
+
+        // Patch login
+        loginBtn.addEventListener('click', function() {
+            const key = adminKeyInput.value.trim();
+            if (key === ADMIN_KEY) {
+                isLoggedIn = true;
+                saveLoginState(true);
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                loginError.style.display = 'none';
+                loadData();
+                renderTable();
+                showToast('✅ Selamat datang, Admin!');
+                adminKeyInput.value = '';
+            } else {
+                loginError.style.display = 'block';
+                adminKeyInput.value = '';
+                adminKeyInput.focus();
+                showToast('❌ Key salah!', 'error');
+            }
+        });
+
+        logoutBtn.addEventListener('click', function() {
+            if (confirm('Yakin logout?')) {
+                isLoggedIn = false;
+                saveLoginState(false);
+                loginSection.classList.remove('hidden');
+                adminContent.classList.add('hidden');
+                showToast('👋 Logout berhasil!');
+            }
+        });
+
+        // ----- CEK MODE PUBLIC -----
+        function isPublicMode() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('mode') === 'public';
+        }
+
+        // ----- INIT -----
+        loadData();
+
+        // Jika mode public, redirect ke halaman publik
+        if (isPublicMode()) {
+            // Tampilkan halaman publik (salin dari kode sebelumnya)
+            // Untuk sederhana, kita redirect ke index.html
+            window.location.href = 'index.html';
+        }
+
+        // Cek login
+        checkLogin();
+
+        // Render tabel jika sudah login
+        if (isLoggedIn) {
+            renderTable();
+        }
+
+        // Expose fungsi ke global
+        window.editScript = editScript;
+        window.deleteScript = deleteScript;
+
+        console.log('🔐 Admin Panel siap!');
+        console.log('📌 Key: 7655827848');
+    </script>
+</body>
+</html>
