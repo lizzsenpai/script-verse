@@ -2,55 +2,16 @@
   "scripts": [
     {
       "id": 1,
-      "title": "Bot WhatsApp Pro",
-      "version": "v3.2.1",
-      "desc": "Bot WhatsApp multi-fitur dengan auto reply, downloader, dan manajemen grup.",
+      "title": "KUROKO MD",
+      "version": "v6. 0",
+      "desc": "Script Simple Cocok Untuk Jaga Group Anda No Enc Bebas Recode",
       "category": "whatsapp",
       "status": "Active",
-      "downloads": 1523,
-      "size": "4.2 MB",
-      "image": "https://picsum.photos/seed/bot1/800/450",
-      "downloadUrl": "https://github.com/example/bot-wa-pro/archive/main.zip",
-      "shareUrl": "https://example.com/script/bot-wa-pro"
-    },
-    {
-      "id": 2,
-      "title": "Bot WhatsApp MD",
-      "version": "v2.0.5",
-      "desc": "Bot WhatsApp menggunakan library whatsapp-web.js. Fitur: sticker maker, pengingat.",
-      "category": "whatsapp",
-      "status": "Beta",
-      "downloads": 876,
-      "size": "3.8 MB",
-      "image": "https://picsum.photos/seed/bot2/800/450",
-      "downloadUrl": "https://github.com/example/bot-wa-md/archive/main.zip",
-      "shareUrl": "https://example.com/script/bot-wa-md"
-    },
-    {
-      "id": 3,
-      "title": "Auto Backup Cloud",
-      "version": "v1.5.0",
-      "desc": "Backup otomatis folder ke Google Drive & Dropbox dengan Python.",
-      "category": "python",
-      "status": "Active",
-      "downloads": 642,
-      "size": "12 KB",
-      "image": "https://picsum.photos/seed/backup/800/450",
-      "downloadUrl": "https://github.com/example/auto-backup/archive/main.zip",
-      "shareUrl": "https://example.com/script/auto-backup"
-    },
-    {
-      "id": 4,
-      "title": "Clean Temp System",
-      "version": "v2.1.0",
-      "desc": "Bersihkan file temporary, cache, dan log di Windows/Linux.",
-      "category": "bash",
-      "status": "Active",
-      "downloads": 417,
-      "size": "4 KB",
-      "image": "https://picsum.photos/seed/cleaner/800/450",
-      "downloadUrl": "https://github.com/example/clean-temp/archive/main.zip",
-      "shareUrl": "https://example.com/script/clean-temp"
+      "downloads": 80,
+      "size": "108KB",
+      "image": "https://files.catbox.moe/rkof7g.jpg",
+      "downloadUrl": "https://www.mediafire.com/file/f4ad4wxhuistkwa/KUROKO_VVIP.zip/file",
+      "shareUrl": "https://youtu.be/2WWolrnw33o?si=Emaym07Uq09nvQ-q"
     }
   ]
 }
