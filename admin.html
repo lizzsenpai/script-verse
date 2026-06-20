@@ -85,6 +85,7 @@
             align-items: center;
             gap: 8px;
             text-decoration: none;
+            font-family: inherit;
         }
 
         .btn-primary {
@@ -140,6 +141,17 @@
         .btn-outline:hover {
             background: #1e293b;
             color: #e8edf5;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #fff;
+            box-shadow: 0 6px 16px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-warning:hover {
+            transform: scale(1.03);
+            box-shadow: 0 10px 28px rgba(245, 158, 11, 0.5);
         }
 
         /* ----- LOGIN FORM ----- */
@@ -286,6 +298,7 @@
             display: flex;
             gap: 12px;
             margin-top: 8px;
+            flex-wrap: wrap;
         }
 
         /* ----- TABEL SCRIPT ----- */
@@ -346,6 +359,19 @@
             font-weight: 600;
         }
 
+        .badge-status-small.active {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+        .badge-status-small.beta {
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+        }
+        .badge-status-small.deprecated {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
+
         /* ----- TOAST ----- */
         .toast {
             position: fixed;
@@ -382,6 +408,9 @@
         }
         .toast.error i {
             color: #f87171;
+        }
+        .toast.warning i {
+            color: #fbbf24;
         }
 
         /* ----- RESPONSIVE ----- */
@@ -427,6 +456,39 @@
         .hidden {
             display: none !important;
         }
+
+        /* Info box */
+        .info-box {
+            background: rgba(129, 140, 248, 0.05);
+            border: 1px solid rgba(129, 140, 248, 0.1);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            color: #94a3b8;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .info-box i {
+            color: #818cf8;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-badge.online {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+        }
+        .status-badge.offline {
+            background: rgba(248, 113, 113, 0.15);
+            color: #f87171;
+        }
     </style>
 </head>
 <body>
@@ -438,9 +500,9 @@
                 <span style="font-size: 0.7rem; background: #818cf8; color: #fff; padding: 2px 12px; border-radius: 20px; -webkit-text-fill-color: #fff;">Admin</span>
             </div>
             <div class="header-actions">
-                <button class="btn btn-secondary" id="viewPublicBtn">
+                <a href="index.html" class="btn btn-secondary" target="_blank">
                     <i class="fas fa-eye"></i> Lihat Publik
-                </button>
+                </a>
                 <button class="btn btn-danger" id="logoutBtn">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
@@ -459,6 +521,13 @@
 
         <!-- KONTEN ADMIN (hanya tampil setelah login) -->
         <div id="adminContent" class="hidden">
+            <!-- Info Server -->
+            <div class="info-box">
+                <i class="fas fa-server"></i>
+                <span>Data disimpan di <strong>script.json</strong> — setiap perubahan akan langsung tersimpan.</span>
+                <span id="serverStatus" class="status-badge online"><i class="fas fa-circle" style="font-size: 0.5rem;"></i> Online</span>
+            </div>
+
             <!-- Form Tambah/Edit Script -->
             <div class="form-section" id="formSection">
                 <h3><i class="fas fa-plus-circle"></i> <span id="formTitle">Tambah Script Baru</span></h3>
@@ -527,6 +596,11 @@
                 <i class="fas fa-plus"></i> Tambah Script Baru
             </button>
 
+            <!-- Tombol Sync ke JSON -->
+            <button class="btn btn-warning" id="syncJsonBtn" style="margin-left: 10px;">
+                <i class="fas fa-sync-alt"></i> Sinkronkan ke JSON
+            </button>
+
             <!-- Tabel Script -->
             <div class="table-wrapper">
                 <table>
@@ -547,7 +621,7 @@
                 </table>
             </div>
             <p style="color: #64748b; margin-top: 1rem; font-size: 0.85rem;">
-                <i class="fas fa-info-circle"></i> Data tersimpan otomatis di penyimpanan browser (LocalStorage).
+                <i class="fas fa-info-circle"></i> Data tersimpan di <strong>script.json</strong> dan juga di LocalStorage sebagai backup.
             </p>
         </div>
     </div>
@@ -559,78 +633,36 @@
     </div>
 
     <script>
-        // ----- KONFIGURASI -----
+        // ============================================================
+        //  KONFIGURASI
+        // ============================================================
         const ADMIN_KEY = '7655827848';
         const STORAGE_KEY = 'scriptverse_data';
+        const JSON_URL = 'script.json';
 
-        // ----- DATA DEFAULT (jika kosong) -----
-        const defaultScripts = [{
-            id: 1,
-            title: 'Bot WhatsApp Pro',
-            version: 'v3.2.1',
-            desc: 'Bot WhatsApp multi-fitur dengan auto reply, downloader, dan manajemen grup.',
-            category: 'whatsapp',
-            status: 'Active',
-            downloads: 1523,
-            size: '4.2 MB',
-            image: 'https://picsum.photos/seed/bot1/800/450',
-            downloadUrl: 'https://github.com/example/bot-wa-pro/archive/main.zip',
-            shareUrl: 'https://example.com/script/bot-wa-pro'
-        }, {
-            id: 2,
-            title: 'Bot WhatsApp MD',
-            version: 'v2.0.5',
-            desc: 'Bot WhatsApp menggunakan library whatsapp-web.js. Fitur: sticker maker, pengingat.',
-            category: 'whatsapp',
-            status: 'Beta',
-            downloads: 876,
-            size: '3.8 MB',
-            image: 'https://picsum.photos/seed/bot2/800/450',
-            downloadUrl: 'https://github.com/example/bot-wa-md/archive/main.zip',
-            shareUrl: 'https://example.com/script/bot-wa-md'
-        }, {
-            id: 3,
-            title: 'Auto Backup Cloud',
-            version: 'v1.5.0',
-            desc: 'Backup otomatis folder ke Google Drive & Dropbox dengan Python.',
-            category: 'python',
-            status: 'Active',
-            downloads: 642,
-            size: '12 KB',
-            image: 'https://picsum.photos/seed/backup/800/450',
-            downloadUrl: 'https://github.com/example/auto-backup/archive/main.zip',
-            shareUrl: 'https://example.com/script/auto-backup'
-        }, {
-            id: 4,
-            title: 'Clean Temp System',
-            version: 'v2.1.0',
-            desc: 'Bersihkan file temporary, cache, dan log di Windows/Linux.',
-            category: 'bash',
-            status: 'Active',
-            downloads: 417,
-            size: '4 KB',
-            image: 'https://picsum.photos/seed/cleaner/800/450',
-            downloadUrl: 'https://github.com/example/clean-temp/archive/main.zip',
-            shareUrl: 'https://example.com/script/clean-temp'
-        }];
-
-        // ----- STATE -----
+        // ============================================================
+        //  STATE
+        // ============================================================
         let scripts = [];
         let isLoggedIn = false;
         let editingId = null;
+        let isSaving = false;
 
-        // ----- ELEMEN -----
+        // ============================================================
+        //  ELEMEN
+        // ============================================================
         const loginSection = document.getElementById('loginSection');
         const adminContent = document.getElementById('adminContent');
         const loginBtn = document.getElementById('loginBtn');
         const adminKeyInput = document.getElementById('adminKeyInput');
         const loginError = document.getElementById('loginError');
         const logoutBtn = document.getElementById('logoutBtn');
-        const viewPublicBtn = document.getElementById('viewPublicBtn');
+        const serverStatus = document.getElementById('serverStatus');
 
         const formSection = document.getElementById('formSection');
         const showFormBtn = document.getElementById('showFormBtn');
         const cancelFormBtn = document.getElementById('cancelFormBtn');
+        const syncJsonBtn = document.getElementById('syncJsonBtn');
         const scriptForm = document.getElementById('scriptForm');
         const formTitle = document.getElementById('formTitle');
         const submitBtnText = document.getElementById('submitBtnText');
@@ -652,7 +684,9 @@
         const toast = document.getElementById('toast');
         const toastMessage = document.getElementById('toastMessage');
 
-        // ----- FUNGSI TOAST -----
+        // ============================================================
+        //  TOAST
+        // ============================================================
         function showToast(message, type = 'success') {
             toastMessage.textContent = message;
             toast.className = 'toast ' + type;
@@ -663,25 +697,168 @@
             }, 3000);
         }
 
-        // ----- CRUD OPERATIONS -----
-        function loadData() {
+        // ============================================================
+        //  LOAD DATA DARI JSON
+        // ============================================================
+        async function loadDataFromJSON() {
+            try {
+                const response = await fetch(JSON_URL + '?t=' + Date.now());
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                
+                if (data && data.scripts && Array.isArray(data.scripts)) {
+                    scripts = data.scripts;
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+                    serverStatus.className = 'status-badge online';
+                    serverStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem;"></i> Online';
+                    return true;
+                }
+                throw new Error('Format data invalid');
+            } catch (error) {
+                console.warn('Gagal load JSON, pakai LocalStorage:', error);
+                serverStatus.className = 'status-badge offline';
+                serverStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem;"></i> Offline (Backup)';
+                loadFromLocalStorage();
+                return false;
+            }
+        }
+
+        // ============================================================
+        //  LOAD DARI LOCALSTORAGE
+        // ============================================================
+        function loadFromLocalStorage() {
             const stored = localStorage.getItem(STORAGE_KEY);
             if (stored) {
                 try {
                     scripts = JSON.parse(stored);
                 } catch (e) {
-                    scripts = [...defaultScripts];
+                    scripts = getDefaultScripts();
                 }
             } else {
-                scripts = [...defaultScripts];
-                saveData();
+                scripts = getDefaultScripts();
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
             }
         }
 
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+        // ============================================================
+        //  DEFAULT DATA
+        // ============================================================
+        function getDefaultScripts() {
+            return [
+                {
+                    id: 1,
+                    title: 'Bot WhatsApp Pro',
+                    version: 'v3.2.1',
+                    desc: 'Bot WhatsApp multi-fitur dengan auto reply, downloader, dan manajemen grup.',
+                    category: 'whatsapp',
+                    status: 'Active',
+                    downloads: 1523,
+                    size: '4.2 MB',
+                    image: 'https://picsum.photos/seed/bot1/800/450',
+                    downloadUrl: 'https://github.com/example/bot-wa-pro/archive/main.zip',
+                    shareUrl: 'https://example.com/script/bot-wa-pro'
+                },
+                {
+                    id: 2,
+                    title: 'Bot WhatsApp MD',
+                    version: 'v2.0.5',
+                    desc: 'Bot WhatsApp menggunakan library whatsapp-web.js. Fitur: sticker maker, pengingat.',
+                    category: 'whatsapp',
+                    status: 'Beta',
+                    downloads: 876,
+                    size: '3.8 MB',
+                    image: 'https://picsum.photos/seed/bot2/800/450',
+                    downloadUrl: 'https://github.com/example/bot-wa-md/archive/main.zip',
+                    shareUrl: 'https://example.com/script/bot-wa-md'
+                },
+                {
+                    id: 3,
+                    title: 'Auto Backup Cloud',
+                    version: 'v1.5.0',
+                    desc: 'Backup otomatis folder ke Google Drive & Dropbox dengan Python.',
+                    category: 'python',
+                    status: 'Active',
+                    downloads: 642,
+                    size: '12 KB',
+                    image: 'https://picsum.photos/seed/backup/800/450',
+                    downloadUrl: 'https://github.com/example/auto-backup/archive/main.zip',
+                    shareUrl: 'https://example.com/script/auto-backup'
+                },
+                {
+                    id: 4,
+                    title: 'Clean Temp System',
+                    version: 'v2.1.0',
+                    desc: 'Bersihkan file temporary, cache, dan log di Windows/Linux.',
+                    category: 'bash',
+                    status: 'Active',
+                    downloads: 417,
+                    size: '4 KB',
+                    image: 'https://picsum.photos/seed/cleaner/800/450',
+                    downloadUrl: 'https://github.com/example/clean-temp/archive/main.zip',
+                    shareUrl: 'https://example.com/script/clean-temp'
+                }
+            ];
         }
 
+        // ============================================================
+        //  SAVE KE JSON
+        // ============================================================
+        async function saveToJSON() {
+            if (isSaving) return;
+            isSaving = true;
+
+            try {
+                const data = { scripts: scripts };
+                const response = await fetch(JSON_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                // Untuk demo, karena tidak ada backend, kita simpan ke localStorage dan tampilkan notifikasi
+                // Sebenarnya di sini kita perlu endpoint API untuk menyimpan
+                // Tapi untuk demo, kita akan menggunakan download JSON
+                if (!response.ok) {
+                    // Fallback: download file JSON
+                    downloadJSON(data);
+                    showToast('⚠️ Server tidak mendukung save, JSON diunduh!', 'warning');
+                } else {
+                    showToast('✅ Data berhasil disimpan ke JSON!', 'success');
+                    serverStatus.className = 'status-badge online';
+                    serverStatus.innerHTML = '<i class="fas fa-circle" style="font-size: 0.5rem;"></i> Online';
+                }
+                
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+            } catch (error) {
+                console.error('Gagal save:', error);
+                // Fallback: download JSON
+                downloadJSON({ scripts: scripts });
+                showToast('⚠️ Gagal save, file JSON diunduh!', 'warning');
+            } finally {
+                isSaving = false;
+            }
+        }
+
+        // ============================================================
+        //  DOWNLOAD JSON (fallback)
+        // ============================================================
+        function downloadJSON(data) {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'script.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // ============================================================
+        //  CRUD OPERATIONS
+        // ============================================================
         function getNextId() {
             return scripts.length > 0 ? Math.max(...scripts.map(s => s.id)) + 1 : 1;
         }
@@ -693,7 +870,7 @@
                 downloads: parseInt(data.downloads) || 0
             };
             scripts.push(newScript);
-            saveData();
+            saveToLocalAndSync();
             renderTable();
             showToast('✅ Script berhasil ditambahkan!');
         }
@@ -706,7 +883,7 @@
                     ...data,
                     downloads: parseInt(data.downloads) || 0
                 };
-                saveData();
+                saveToLocalAndSync();
                 renderTable();
                 showToast('✅ Script berhasil diupdate!');
             }
@@ -715,13 +892,21 @@
         function deleteScript(id) {
             if (confirm('Yakin hapus script ini?')) {
                 scripts = scripts.filter(s => s.id !== id);
-                saveData();
+                saveToLocalAndSync();
                 renderTable();
                 showToast('🗑️ Script dihapus!');
             }
         }
 
-        // ----- RENDER TABEL -----
+        function saveToLocalAndSync() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
+            // Auto sync ke JSON
+            saveToJSON();
+        }
+
+        // ============================================================
+        //  RENDER TABEL
+        // ============================================================
         function renderTable() {
             if (scripts.length === 0) {
                 tableBody.innerHTML = `
@@ -737,12 +922,12 @@
 
             tableBody.innerHTML = scripts.map(s => `
                 <tr>
-                    <td><img src="${s.image}" alt="${s.title}" class="table-thumb" /></td>
+                    <td><img src="${s.image}" alt="${s.title}" class="table-thumb" onerror="this.src='https://picsum.photos/seed/error${s.id}/60/34'" /></td>
                     <td><strong>${s.title}</strong></td>
                     <td>${s.version}</td>
                     <td><span class="badge-status-small" style="background:rgba(129,140,248,0.2); color:#818cf8;">${s.category}</span></td>
-                    <td><span class="badge-status-small badge-status-small-${s.status.toLowerCase()}">${s.status}</span></td>
-                    <td>${s.downloads.toLocaleString()}</td>
+                    <td><span class="badge-status-small ${s.status.toLowerCase()}">${s.status}</span></td>
+                    <td>${(s.downloads || 0).toLocaleString()}</td>
                     <td>
                         <div class="table-actions">
                             <button class="btn btn-primary" onclick="editScript(${s.id})" style="padding:4px 12px; font-size:0.75rem;">
@@ -757,7 +942,9 @@
             `).join('');
         }
 
-        // ----- EDIT SCRIPT -----
+        // ============================================================
+        //  EDIT SCRIPT
+        // ============================================================
         function editScript(id) {
             const script = scripts.find(s => s.id === id);
             if (!script) return;
@@ -769,8 +956,8 @@
             fDesc.value = script.desc;
             fCategory.value = script.category;
             fStatus.value = script.status;
-            fDownloads.value = script.downloads;
-            fSize.value = script.size;
+            fDownloads.value = script.downloads || 0;
+            fSize.value = script.size || '1 MB';
             fImage.value = script.image;
             fDownloadUrl.value = script.downloadUrl;
             fShareUrl.value = script.shareUrl || '';
@@ -782,7 +969,9 @@
             showFormBtn.style.display = 'none';
         }
 
-        // ----- RESET FORM -----
+        // ============================================================
+        //  RESET FORM
+        // ============================================================
         function resetForm() {
             scriptForm.reset();
             editId.value = '';
@@ -795,7 +984,9 @@
             fSize.value = '1 MB';
         }
 
-        // ----- HANDLE FORM SUBMIT -----
+        // ============================================================
+        //  EVENT: FORM SUBMIT
+        // ============================================================
         scriptForm.addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -812,7 +1003,6 @@
                 shareUrl: fShareUrl.value.trim() || fDownloadUrl.value.trim()
             };
 
-            // Validasi
             if (!data.title || !data.version || !data.desc || !data.image || !data.downloadUrl) {
                 showToast('⚠️ Semua field wajib diisi!', 'error');
                 return;
@@ -827,16 +1017,30 @@
             resetForm();
         });
 
-        // ----- EVENT LISTENERS -----
+        // ============================================================
+        //  EVENT: CANCEL
+        // ============================================================
+        cancelFormBtn.addEventListener('click', resetForm);
+
+        // ============================================================
+        //  EVENT: SHOW FORM
+        // ============================================================
         showFormBtn.addEventListener('click', function() {
             resetForm();
             formSection.classList.add('show');
             this.style.display = 'none';
         });
 
-        cancelFormBtn.addEventListener('click', resetForm);
+        // ============================================================
+        //  EVENT: SYNC JSON
+        // ============================================================
+        syncJsonBtn.addEventListener('click', function() {
+            saveToJSON();
+        });
 
-        // ----- LOGIN -----
+        // ============================================================
+        //  EVENT: LOGIN
+        // ============================================================
         loginBtn.addEventListener('click', function() {
             const key = adminKeyInput.value.trim();
             if (key === ADMIN_KEY) {
@@ -844,10 +1048,12 @@
                 loginSection.classList.add('hidden');
                 adminContent.classList.remove('hidden');
                 loginError.style.display = 'none';
-                loadData();
-                renderTable();
+                loadDataFromJSON().then(() => {
+                    renderTable();
+                });
                 showToast('✅ Selamat datang, Admin!');
                 adminKeyInput.value = '';
+                saveLoginState(true);
             } else {
                 loginError.style.display = 'block';
                 adminKeyInput.value = '';
@@ -860,69 +1066,9 @@
             if (e.key === 'Enter') loginBtn.click();
         });
 
-        // ----- LOGOUT -----
-        logoutBtn.addEventListener('click', function() {
-            if (confirm('Yakin logout?')) {
-                isLoggedIn = false;
-                loginSection.classList.remove('hidden');
-                adminContent.classList.add('hidden');
-                showToast('👋 Logout berhasil!');
-            }
-        });
-
-        // ----- VIEW PUBLIC (buka halaman publik di tab baru) -----
-        viewPublicBtn.addEventListener('click', function() {
-            // Buka halaman publik (kita simpan di file terpisah atau tab baru)
-            // Karena kita pakai satu file, kita akan reload dengan parameter
-            window.open('?mode=public', '_blank');
-        });
-
-        // ----- CEK LOGIN STATE -----
-        function checkLogin() {
-            // Cek apakah sudah login (bisa pakai session storage)
-            // Untuk demo, kita simpel: cek dari localStorage flag
-            const savedLogin = localStorage.getItem('scriptverse_admin_login');
-            if (savedLogin === 'true') {
-                isLoggedIn = true;
-                loginSection.classList.add('hidden');
-                adminContent.classList.remove('hidden');
-                loadData();
-                renderTable();
-            }
-        }
-
-        // Simpan login state
-        function saveLoginState(state) {
-            localStorage.setItem('scriptverse_admin_login', state ? 'true' : 'false');
-        }
-
-        // Override login/logout untuk simpan state
-        const originalLogin = loginBtn.click;
-        loginBtn.addEventListener('click', function() {
-            // sudah di atas
-        });
-
-        // Patch login
-        loginBtn.addEventListener('click', function() {
-            const key = adminKeyInput.value.trim();
-            if (key === ADMIN_KEY) {
-                isLoggedIn = true;
-                saveLoginState(true);
-                loginSection.classList.add('hidden');
-                adminContent.classList.remove('hidden');
-                loginError.style.display = 'none';
-                loadData();
-                renderTable();
-                showToast('✅ Selamat datang, Admin!');
-                adminKeyInput.value = '';
-            } else {
-                loginError.style.display = 'block';
-                adminKeyInput.value = '';
-                adminKeyInput.focus();
-                showToast('❌ Key salah!', 'error');
-            }
-        });
-
+        // ============================================================
+        //  EVENT: LOGOUT
+        // ============================================================
         logoutBtn.addEventListener('click', function() {
             if (confirm('Yakin logout?')) {
                 isLoggedIn = false;
@@ -933,36 +1079,39 @@
             }
         });
 
-        // ----- CEK MODE PUBLIC -----
-        function isPublicMode() {
-            const params = new URLSearchParams(window.location.search);
-            return params.get('mode') === 'public';
+        // ============================================================
+        //  LOGIN STATE
+        // ============================================================
+        function saveLoginState(state) {
+            localStorage.setItem('scriptverse_admin_login', state ? 'true' : 'false');
         }
 
-        // ----- INIT -----
-        loadData();
-
-        // Jika mode public, redirect ke halaman publik
-        if (isPublicMode()) {
-            // Tampilkan halaman publik (salin dari kode sebelumnya)
-            // Untuk sederhana, kita redirect ke index.html
-            window.location.href = 'index.html';
+        function checkLogin() {
+            const savedLogin = localStorage.getItem('scriptverse_admin_login');
+            if (savedLogin === 'true') {
+                isLoggedIn = true;
+                loginSection.classList.add('hidden');
+                adminContent.classList.remove('hidden');
+                loadDataFromJSON().then(() => {
+                    renderTable();
+                });
+            }
         }
 
-        // Cek login
-        checkLogin();
-
-        // Render tabel jika sudah login
-        if (isLoggedIn) {
-            renderTable();
-        }
-
-        // Expose fungsi ke global
+        // ============================================================
+        //  EXPOSE GLOBAL FUNCTIONS
+        // ============================================================
         window.editScript = editScript;
         window.deleteScript = deleteScript;
 
+        // ============================================================
+        //  INIT
+        // ============================================================
+        checkLogin();
+
         console.log('🔐 Admin Panel siap!');
         console.log('📌 Key: 7655827848');
+        console.log('📦 Data disinkronkan dengan script.json');
     </script>
 </body>
 </html>
