@@ -953,7 +953,7 @@
                 </table>
             </div>
             <p style="color: #64748b; margin-top: 1rem; font-size: 0.8rem;">
-                <i class="fas fa-info-circle"></i> Data tersimpan otomatis di LocalStorage browser.
+                <i class="fas fa-info-circle"></i> Data tersimpan di server, semua orang bisa lihat!
             </p>
         </div>
 
@@ -991,63 +991,15 @@
 
     <script>
         // ============================================================
+        //  KONFIGURASI API
+        // ============================================================
+        // GANTI URL INI dengan URL Vercel kamu!
+        const API_URL = 'https://scriptverse-api.vercel.app/scripts';
+
+        // ============================================================
         //  CONFIG
         // ============================================================
         const ADMIN_KEY = '7655827848';
-        const STORAGE_KEY = 'scriptverse_data';
-
-        // ============================================================
-        //  DEFAULT DATA
-        // ============================================================
-        const defaultScripts = [{
-            id: 1,
-            title: 'Bot WhatsApp Pro',
-            version: 'v3.2.1',
-            desc: 'Bot WhatsApp multi-fitur dengan auto reply, downloader, dan manajemen grup.',
-            category: 'whatsapp',
-            status: 'Active',
-            downloads: 1523,
-            size: '4.2 MB',
-            image: 'https://picsum.photos/seed/bot1/800/450',
-            downloadUrl: 'https://github.com/example/bot-wa-pro/archive/main.zip',
-            shareUrl: 'https://example.com/script/bot-wa-pro'
-        }, {
-            id: 2,
-            title: 'Bot WhatsApp MD',
-            version: 'v2.0.5',
-            desc: 'Bot WhatsApp menggunakan library whatsapp-web.js. Fitur: sticker maker, pengingat.',
-            category: 'whatsapp',
-            status: 'Beta',
-            downloads: 876,
-            size: '3.8 MB',
-            image: 'https://picsum.photos/seed/bot2/800/450',
-            downloadUrl: 'https://github.com/example/bot-wa-md/archive/main.zip',
-            shareUrl: 'https://example.com/script/bot-wa-md'
-        }, {
-            id: 3,
-            title: 'Auto Backup Cloud',
-            version: 'v1.5.0',
-            desc: 'Backup otomatis folder ke Google Drive & Dropbox dengan Python.',
-            category: 'python',
-            status: 'Active',
-            downloads: 642,
-            size: '12 KB',
-            image: 'https://picsum.photos/seed/backup/800/450',
-            downloadUrl: 'https://github.com/example/auto-backup/archive/main.zip',
-            shareUrl: 'https://example.com/script/auto-backup'
-        }, {
-            id: 4,
-            title: 'Clean Temp System',
-            version: 'v2.1.0',
-            desc: 'Bersihkan file temporary, cache, dan log di Windows/Linux.',
-            category: 'bash',
-            status: 'Active',
-            downloads: 417,
-            size: '4 KB',
-            image: 'https://picsum.photos/seed/cleaner/800/450',
-            downloadUrl: 'https://github.com/example/clean-temp/archive/main.zip',
-            shareUrl: 'https://example.com/script/clean-temp'
-        }];
 
         // ============================================================
         //  STATE
@@ -1057,6 +1009,7 @@
         let editingId = null;
         let currentFilter = 'all';
         let searchQuery = '';
+        let loading = false;
 
         // ============================================================
         //  ELEMENTS
@@ -1113,65 +1066,74 @@
         }
 
         // ============================================================
-        //  DATA
+        //  API FUNCTIONS (GANTI localStorage PAKAI FETCH)
         // ============================================================
-        function loadData() {
-            const stored = localStorage.getItem(STORAGE_KEY);
-            if (stored) {
-                try {
-                    scripts = JSON.parse(stored);
-                } catch (e) {
-                    scripts = JSON.parse(JSON.stringify(defaultScripts));
-                }
-            } else {
-                scripts = JSON.parse(JSON.stringify(defaultScripts));
-                saveData();
+
+        // Ambil semua data dari server
+        async function loadData() {
+            try {
+                const res = await fetch(API_URL);
+                if (!res.ok) throw new Error('Gagal ambil data');
+                scripts = await res.json();
+                return scripts;
+            } catch (error) {
+                console.error('Error loading data:', error);
+                showToast('❌ Gagal memuat data dari server', 'error');
+                scripts = [];
+                return [];
             }
         }
 
-        function saveData() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(scripts));
-        }
-
-        function getNextId() {
-            return scripts.length > 0 ? Math.max(...scripts.map(s => s.id)) + 1 : 1;
-        }
-
-        // ============================================================
-        //  CRUD
-        // ============================================================
-        function addScript(data) {
-            const newScript = {
-                id: getNextId(),
-                ...data,
-                downloads: parseInt(data.downloads) || 0
-            };
-            scripts.push(newScript);
-            saveData();
-            renderAll();
-            showToast('✅ Script berhasil ditambahkan!');
-        }
-
-        function updateScript(id, data) {
-            const index = scripts.findIndex(s => s.id === id);
-            if (index !== -1) {
-                scripts[index] = {
-                    ...scripts[index],
-                    ...data,
-                    downloads: parseInt(data.downloads) || 0
-                };
-                saveData();
-                renderAll();
-                showToast('✅ Script berhasil diupdate!');
+        // Tambah script baru
+        async function addScript(data) {
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error('Gagal tambah script');
+                const result = await res.json();
+                return result;
+            } catch (error) {
+                console.error('Error adding script:', error);
+                showToast('❌ Gagal menambahkan script', 'error');
+                return null;
             }
         }
 
-        function deleteScript(id) {
-            if (confirm('Yakin hapus script ini?')) {
-                scripts = scripts.filter(s => s.id !== id);
-                saveData();
-                renderAll();
+        // Update script
+        async function updateScript(id, data) {
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!res.ok) throw new Error('Gagal update script');
+                const result = await res.json();
+                return result;
+            } catch (error) {
+                console.error('Error updating script:', error);
+                showToast('❌ Gagal mengupdate script', 'error');
+                return null;
+            }
+        }
+
+        // Hapus script
+        async function deleteScript(id) {
+            if (!confirm('Yakin hapus script ini?')) return false;
+            try {
+                const res = await fetch(`${API_URL}/${id}`, {
+                    method: 'DELETE'
+                });
+                if (!res.ok) throw new Error('Gagal hapus script');
                 showToast('🗑️ Script dihapus!');
+                return true;
+            } catch (error) {
+                console.error('Error deleting script:', error);
+                showToast('❌ Gagal menghapus script', 'error');
+                return false;
             }
         }
 
@@ -1204,13 +1166,24 @@
                             <button class="btn btn-primary" onclick="editScript(${s.id})" style="padding:4px 12px; font-size:0.7rem;">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-danger" onclick="deleteScript(${s.id})" style="padding:4px 12px; font-size:0.7rem;">
+                            <button class="btn btn-danger" onclick="handleDelete(${s.id})" style="padding:4px 12px; font-size:0.7rem;">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </td>
                 </tr>
             `).join('');
+        }
+
+        // ============================================================
+        //  HANDLE DELETE (pakai async)
+        // ============================================================
+        async function handleDelete(id) {
+            const success = await deleteScript(id);
+            if (success) {
+                await loadData();
+                renderAll();
+            }
         }
 
         // ============================================================
@@ -1249,9 +1222,9 @@
         }
 
         // ============================================================
-        //  FORM SUBMIT
+        //  FORM SUBMIT (pakai async)
         // ============================================================
-        scriptForm.addEventListener('submit', function(e) {
+        scriptForm.addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const data = {
@@ -1272,13 +1245,19 @@
                 return;
             }
 
+            let result;
             if (editingId) {
-                updateScript(editingId, data);
+                result = await updateScript(editingId, data);
             } else {
-                addScript(data);
+                result = await addScript(data);
             }
 
-            resetForm();
+            if (result) {
+                await loadData();
+                renderAll();
+                resetForm();
+                showToast(editingId ? '✅ Script berhasil diupdate!' : '✅ Script berhasil ditambahkan!');
+            }
         });
 
         cancelFormBtn.addEventListener('click', resetForm);
@@ -1484,18 +1463,21 @@
         // ============================================================
         //  INIT
         // ============================================================
-        loadData();
-        renderAll();
-
-        // Auto refresh tiap 5 detik
-        setInterval(() => {
-            loadData();
+        async function init() {
+            await loadData();
             renderAll();
-        }, 5000);
+            console.log('✅ ScriptVerse siap!');
+            console.log('🔑 Key admin: 7655827848');
+            console.log('📦 Data disimpan di server via JSON API');
+        }
 
-        console.log('✅ ScriptVerse siap!');
-        console.log('🔑 Key admin: 7655827848');
-        console.log('📦 Data di LocalStorage');
+        init();
+
+        // Auto refresh tiap 10 detik
+        setInterval(async () => {
+            await loadData();
+            renderAll();
+        }, 10000);
     </script>
 
 </body>
